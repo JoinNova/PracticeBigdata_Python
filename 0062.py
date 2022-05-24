@@ -3,6 +3,7 @@
 데이터 설명 : 은행의 전화 마케팅에 대해 고객의 반응 여부
 dataurl : https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/train.csv
 '''
+'''
 import pandas as pd
 data = 'https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/train.csv'
 df = pd.read_csv(data)
@@ -55,3 +56,127 @@ chk = df.groupby(['job', 'marital']).size().reset_index()
 pivotdf = chk.pivot_table(index = 'job', columns = 'marital')[0]
 pivotdf['ratio'] = pivotdf.divorced/pivotdf.married
 print(pivotdf['ratio'].max())
+'''
+'''
+데이터 출처 : https://archive.ics.uci.edu/ml/datasets/Bank+Marketing (후처리 작업)
+데이터 설명 : 은행의 전화 마케팅에 대해 고객의 반응 여부
+train : https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/train.csv
+test : https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/test.csv
+submission : https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/submission.csv
+'''
+import pandas as pd
+import numpy as np
+#import matplotlib.pyplot as plt
+from sklearn import preprocessing
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+#import seaborn as sns
+
+train = pd.read_csv('https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/train.csv')
+test = pd.read_csv('https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/test.csv')
+submission = pd.read_csv('https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/submission.csv')
+pd.set_option("display.max_columns", None)
+#print(train.head(3))
+rows = train.shape[0]
+cols = train.shape[1]
+dupRows = train.duplicated().sum()
+#print(dupRows)
+train = train.replace("no", 0)
+train = train.replace("yes", 1)
+
+ycorr = train.corr()["y"]
+ycorr = pd.DataFrame(ycorr)
+#print(ycorr)
+df = train
+
+df["job"] = df["job"].astype(str)
+df["marital"] = df["marital"].astype(str)
+df["education"] = df["education"].astype(str)
+df["default"] = df["default"].astype(str)
+df["contact"] = df["contact"].astype(str)
+df["month"] = df["month"].astype(str)
+df["day"] = df["day"].astype(str)
+df["poutcome"] = df["poutcome"].astype(str)
+df["housing"] = df["housing"].astype(str)
+df["loan"] = df["loan"].astype(str)
+#print(df.head())
+
+from sklearn import preprocessing
+
+number = preprocessing.LabelEncoder()
+
+df["job"] = number.fit_transform(df["job"])
+df["marital"] = number.fit_transform(df["marital"])
+df["education"] = number.fit_transform(df["education"])
+df["default"] = number.fit_transform(df["default"])
+df["contact"] = number.fit_transform(df["contact"])
+df["month"] = number.fit_transform(df["month"])
+df["day"] = number.fit_transform(df["day"])
+df["poutcome"] = number.fit_transform(df["poutcome"])
+df["housing"] = number.fit_transform(df["housing"])
+df["loan"] = number.fit_transform(df["loan"])
+
+#print(df.head())
+
+#LOGISTIC REGRESSION
+from sklearn.model_selection import train_test_split
+
+X = df.drop(["y"], axis = 1)
+y = df["y"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 0, test_size = 0.15)
+#print(X_train, X_test, y_train, y_test)
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression(solver = "saga", max_iter = 10000)
+model.fit(X_train, y_train)
+
+print('LOGISTIC REGRESSION : ', model.score(X_test, y_test))
+
+#RANDOM FOREST
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(criterion = "entropy")
+model.fit(X_train, y_train)
+
+print('RANDOM FOREST : ', model.score(X_test, y_test))
+
+#DECISION TREE
+from sklearn.tree import DecisionTreeClassifier
+
+model = DecisionTreeClassifier(criterion = "entropy")
+model.fit(X_train, y_train)
+
+print('DECISION TREE : ', model.score(X_test, y_test))
+
+#SVM WITH RBF-KERNEL
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+scaler.fit(X_train)
+
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)
+
+from sklearn.svm import SVC
+
+model = SVC(kernel = "rbf", gamma = 0.01, C = 5)
+model.fit(X_train, y_train)
+
+print('SVM WITH RBF-KERNEL : ', model.score(X_test, y_test))
+
+#GAUSSIAN NAIVE BAYES
+from sklearn.naive_bayes import GaussianNB
+
+model = GaussianNB()
+model.fit(X_train, y_train)
+
+print('GAUSSIAN NAIVE BAYES : ', model.score(X_test, y_test))
+
+#KNN
+from sklearn.neighbors import KNeighborsClassifier
+
+model = KNeighborsClassifier(n_neighbors = 18)
+model.fit(X_train, y_train)
+
+print('KNN : ', model.score(X_test, y_test))
