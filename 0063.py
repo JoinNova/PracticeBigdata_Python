@@ -3,6 +3,7 @@
 데이터 설명 : 은행의 전화 마케팅에 대해 고객의 반응 여부
 dataurl : https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/train.csv
 '''
+'''
 import pandas as pd
 data = 'https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/train.csv'
 df = pd.read_csv(data)
@@ -58,3 +59,52 @@ print(chk)
 pivotdf = chk.pivot_table(index = 'job', columns = 'marital')[0]
 pivotdf['ratio'] = pivotdf['divorced'] / pivotdf['married']
 print(pivotdf.ratio.max())
+'''
+'''
+데이터 출처 : https://archive.ics.uci.edu/ml/datasets/Bank+Marketing (후처리 작업)
+데이터 설명 : 은행의 전화 마케팅에 대해 고객의 반응 여부
+train : https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/train.csv
+test : https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/test.csv
+submission : https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/submission.csv
+'''
+import pandas as pd
+pd.set_option("display.max_columns", None)
+
+tr = 'https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/train.csv'
+train = pd.read_csv(tr)
+#print(train.head())
+#print(train.info())
+#te = 'https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/test.csv'
+#test = pd.read_csv(te)
+#print(test.head())
+#print(test.info())
+sub = 'https://raw.githubusercontent.com/Datamanim/datarepo/main/bank/submission.csv'
+submission = pd.read_csv(sub)
+#print(submission.head())
+#print(submission.info())
+
+from sklearn.model_selection import train_test_split
+
+x = train.drop(columns = ['ID', 'y'])
+xd = pd.get_dummies(x)
+#print(xd)
+y = train['y']
+#print(y)
+
+x_train, x_test, y_train, y_test = train_test_split(xd, y, stratify = y, random_state = 1)
+
+from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier()
+rf.fit(x_train, y_train)
+pred = rf.predict_proba(x_test)
+#print(pred)
+
+from sklearn.metrics import roc_auc_score, classification_report
+print('test roc score : ', roc_auc_score(y_test, pred[:, 1]))
+
+test_pred = rf.predict_proba(pd.get_dummies(test.drop(columns = ['ID'])))
+submission['predict'] = test_pred[:, 1]
+
+print('submission file')
+print(submission.head(10))
+submission.to_csv('bank0001.csv', index = False)
