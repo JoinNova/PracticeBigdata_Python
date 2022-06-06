@@ -30,7 +30,7 @@ print(result)
 import pandas as pd
 data = 'housing.csv'
 df = pd.read_csv(data)
-print(df['total_bedrooms'].sort_values(ascending = False))
+#print(df['total_bedrooms'].sort_values(ascending = False))
 #print(df)
 #print(df.info())
 
@@ -43,17 +43,35 @@ housing_office 항목에서
 결측값을 중앙값으로 변환한후,
 변환이전과 이후의 표준편차 차이를 구하시오.
 '''
-df_ = df.head(int(len(df)*0.8))
+df_ = df.iloc[:int(len(df)*0.8)]
 #원본데이터에서 순서대로 80%까지 추출
 #print(df_.head())
 #print(df_.info())
 
-fir = df_['total_bedrooms'].var()
-print(fir)  #결측값 보정전 표준편차
+fir = df_['total_bedrooms'].var()**(1/2)
+#print(fir)  #결측값 보정전 표준편차
 
 df_.loc[df_['total_bedrooms'].isnull(),'total_bedrooms'] = df_['total_bedrooms'].fillna(df_['total_bedrooms'].median())
-sec = df_['total_bedrooms'].var() 
-print(sec) #결측값 중앙값으로 보정 후 표준편차
+sec = df_['total_bedrooms'].var()**(1/2)
+#print(sec) #결측값 중앙값으로 보정 후 표준편차
 
 print(abs(fir - sec))
 #변화 전과 후의 표준편차 차이
+
+
+import pandas as pd
+data = 'Insurance.csv'
+df = pd.read_csv(data)
+print(df)
+print(df.info())
+
+'''
+다음은 Insurance 데이터 세트이다. Charges 항목에서 이상값의 합을 구하시오.
+(이상값은 평균에서 1.5표준편차인 값)
+'''
+mid = df.charges.mean()
+v = df.charges.var()
+sq = v**(1/2)
+print(mid, '\n', v, '\n', sq)
+ans = df[(df.charges < (mid - 1.5*sq)) | (df.charges > (mid + 1.5*sq))].charges.sum()
+print(ans)
