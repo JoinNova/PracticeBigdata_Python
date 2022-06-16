@@ -15,6 +15,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
 rf = RandomForestClassifier()
+from sklearn.ensemble import AdaBoostClassifier
+ada = AdaBoostClassifier()
+from sklearn.metrics import accuracy_score
+#ac = accuracy_score()
+from sklearn.metrics import classification_report
+#cr = classification_report()
 
 #전처리
 x = train.drop(columns = ['Unnamed: 0', 'TravelInsurance'])
@@ -24,11 +30,21 @@ y = train['TravelInsurance']
 #학습
 x_train, x_test, y_train, y_test = train_test_split(xd, y, stratify = y, random_state = 42)
 rf.fit(x_train, y_train)
-pred = rf.predict_proba(x_test)
-print('test roc score : ', roc_auc_score(y_test, pred[:, 1]))
+pred_rf = rf.predict_proba(x_test)
+print('test rf_roc score : ', roc_auc_score(y_test, pred_rf[:, 1]))
+submission_rf = pd.DataFrame({'index': x_test.index,'predict': pred_rf[:, 1]})
+#print('test rf_accuracy_score : ', accuracy_score(y_test, pred_rf))
 
-submission = pd.DataFrame({'index': x_test.index,'predict': pred[:, 1]})
+
+ada.fit(x_train, y_train)
+pred_ada = ada.predict_proba(x_test)
+print('test ada_roc score : ', roc_auc_score(y_test, pred_ada[:, 1]))
+submission_ada = pd.DataFrame({'index':x_test.index, 'predict': pred_ada[:, 1]})
+#print('test ada_accuracy_score : ', accuracy_score(y_test, pred_ada))
 
 #출력&저장
-print('submission file\n', submission.head())
-submission.to_csv('post03_002_01.csv', index = False)
+print('rf_submission file\n', submission_rf.head())
+submission_rf.to_csv('post03_002_01_rf.csv', index = False)
+
+print('ada_submission file\n', submission_ada.head())
+submission_ada.to_csv('post03_002_01_ada.csv', index = False)
