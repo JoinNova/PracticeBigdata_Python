@@ -58,4 +58,4 @@ print('rf submission file\n', rf_submission.head())
 rf_submission.to_csv('sony02_002_13_rf.csv', index = False)
 
 print('ada submission file\n', ada_submission.head())
-ada_submission.to_csv('sony02_002_13_ada,csv', index = False)
+ada_submission.to_csv('sony02_002_13_ada.csv', index = False)
